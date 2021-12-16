@@ -21,18 +21,18 @@ class HeaderlessLogAPI:
             print(f"headerlessLogAPI send_message")
             # Decode data
             decoded_data = data.decode('utf8').replace("'", '"')
-            app.logger.info(f"decoded_data: {decoded_data}")
+
             # Retrieve JSON object from incoming data
             json_data = re.search('{(.*)}', decoded_data)
             json_string = "{" + json_data.group(1)+ "}"
             json_object = json.loads(json_string)
-
+            app.logger.info(f"Outcoming data: {json_object}")
             # Send retrieved JSON with POST request to Logs API endpoint
             repsonse = requests.post(url=self.endpoint, json=json_object)
 
             # Print response
-            print(f"headerlessLogAPI response status code: {repsonse.status_code}")
-            print(f"headerlessLogAPI response text: {repsonse.text}")
+            app.logger.info(f"New Relic Log API response status code: {repsonse.status_code}")
+            app.logger.info(f"New Relic Log API response text: {repsonse.text}")
         except HTTPError as e:
             # Print error
             print(e)
@@ -44,6 +44,7 @@ def index():
 @app.route('/logs', methods=['POST'])
 def send_logs():
     app.logger.info(f"Incoming data: {request.data}")
+    logs_api.send_message(data=request.data)
     return Response(status=200)
 
 # Set Logging
@@ -52,6 +53,7 @@ if __name__ != '__main__':
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
 
-if __name__ == '__main__':
     logs_api = HeaderlessLogAPI(endpoint=logs_api_endpoint)
+
+if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True)
