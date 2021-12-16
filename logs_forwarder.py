@@ -21,7 +21,7 @@ class HeaderlessLogAPI:
             print(f"headerlessLogAPI send_message")
             # Decode data
             decoded_data = data.decode('utf8').replace("'", '"')
-
+            app.logger.info(f"decoded_data: {decoded_data}")
             # Retrieve JSON object from incoming data
             json_data = re.search('{(.*)}', decoded_data)
             json_string = "{" + json_data.group(1)+ "}"
