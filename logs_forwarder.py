@@ -4,6 +4,7 @@ from requests.models import HTTPError
 import re
 import json
 import os
+import logging
 
 app = Flask(__name__)
 logs_api_endpoint = os.environ.get('LOGS_API_ENDPOINT')
@@ -42,8 +43,14 @@ def index():
 
 @app.route('/logs', methods=['POST'])
 def send_logs():
-    print(f"Incoming data: {request.data}")
+    app.logger.info(f"Incoming data: {request.data}")
     return Response(status=200)
+
+# Set Logging
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
 
 if __name__ == '__main__':
     logs_api = HeaderlessLogAPI(endpoint=logs_api_endpoint)
