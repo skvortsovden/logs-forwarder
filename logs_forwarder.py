@@ -25,28 +25,31 @@ class HeaderlessLogAPI:
             for line in decoded_data.split('\\n'):
                 # Retrieve JSON object from incoming data
                 json_data = re.search('{(.*)}', line)
-                json_string = "{" + json_data.group(1)+ "}"
-                json_object = json.loads(json_string)
-                app.logger.info(f"Outcoming data: {json_object}")
+                if json_data:
+                    json_string = "{" + json_data.group(1)+ "}"
+                    json_object = json.loads(json_string)
+                    app.logger.info(f"Outcoming data: {json_object}")
 
-                # Get API endpoint for incoming data entity
-                if logs_api_endpoints:
-                    logs_api_endpoints_json = json.loads(logs_api_endpoints)
-                    for key, value in logs_api_endpoints_json.items():
-                        if key == json_object['entity.name']:
-                            logs_api_endpoint = value
-                    # Send retrieved JSON with POST request to Logs API endpoint
-                    app.logger.info(f"Sending data to New Relic for entity: {json_object['entity.name']}")
-                    try:
-                        repsonse = requests.post(url=logs_api_endpoint, json=json_object)
-                        # Print response
-                        app.logger.info(f"New Relic Log API response status code: {repsonse.status_code}")
-                        app.logger.info(f"New Relic Log API response text: {repsonse.text}")
-                    except HTTPError as e:
-                        # Print error
-                        print(e)
+                    # Get API endpoint for incoming data entity
+                    if logs_api_endpoints:
+                        logs_api_endpoints_json = json.loads(logs_api_endpoints)
+                        for key, value in logs_api_endpoints_json.items():
+                            if key == json_object['entity.name']:
+                                logs_api_endpoint = value
+                        # Send retrieved JSON with POST request to Logs API endpoint
+                        app.logger.info(f"Sending data to New Relic for entity: {json_object['entity.name']}")
+                        try:
+                            repsonse = requests.post(url=logs_api_endpoint, json=json_object)
+                            # Print response
+                            app.logger.info(f"New Relic Log API response status code: {repsonse.status_code}")
+                            app.logger.info(f"New Relic Log API response text: {repsonse.text}")
+                        except HTTPError as e:
+                            # Print error
+                            print(e)
+                    else:
+                        app.logger.info(f"Endpoint NOT_FOUND for: {json_object['entity.name']}")
                 else:
-                    app.logger.info(f"Endpoint NOT_FOUND for: {json_object['entity.name']}")
+                   app.logger.info(f"Incoming data does not contain json")
 
 
 @app.route('/')
