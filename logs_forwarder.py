@@ -21,12 +21,11 @@ class HeaderlessLogAPI:
             print(f"headerlessLogAPI send_message")
             # Decode data
             decoded_data = data.decode('utf8')
-
-            for line in decoded_data.split('\\n'):
-                # Retrieve JSON object from incoming data
-                json_data = re.search('{(.*)}', line)
-                if json_data:
-                    json_string = "{" + json_data.group(1)+ "}"
+            # Retrieve JSON objects from incoming data
+            json_data = re.findall(r"{(.*?)}", decoded_data)
+            if json_data:
+                for item in json_data:
+                    json_string = "{" + item + "}"
                     json_object = json.loads(json_string)
                     app.logger.info(f"Outcoming data: {json_object}")
 
@@ -47,9 +46,12 @@ class HeaderlessLogAPI:
                             # Print error
                             print(e)
                     else:
-                        app.logger.info(f"Endpoint NOT_FOUND for: {json_object['entity.name']}")
-                else:
-                   app.logger.info(f"Incoming data does not contain json")
+                        if "entity.name" in json_object:
+                            app.logger.info(f"Endpoint NOT_FOUND for: {json_object['entity.name']}")
+                        else:
+                            app.logger.info(f"Key entity.name NOT_FOUND for incoming json")
+            else:
+                app.logger.info(f"Incoming data does not contain json")
 
 
 @app.route('/')
