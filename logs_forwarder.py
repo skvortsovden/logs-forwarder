@@ -20,7 +20,7 @@ class HeaderlessLogAPI:
 
             print(f"headerlessLogAPI send_message")
             # Decode data
-            decoded_data = data.decode('utf8').replace("'", '"')
+            decoded_data = data.decode('utf8')
 
             for line in decoded_data.split('\\n'):
                 # Retrieve JSON object from incoming data
